@@ -3,7 +3,7 @@ import { AppShell } from "@/components/AppShell";
 import { ListingCard } from "@/components/ListingCard";
 import { CATEGORIES } from "@/lib/wilayas";
 import { useListings } from "@/lib/db-hooks";
-import { Search, Sparkles, TrendingUp, Shield } from "lucide-react";
+import { Search, Sparkles, TrendingUp, Shield, Flame } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,8 +25,8 @@ function Home() {
   const [q, setQ] = useState("");
   const navigate = useNavigate();
 
-  const featured = listings?.slice(0, 8) || [];
-  const recent = listings?.slice(0, 12) || [];
+  const featured = listings?.slice(0, 5) || [];
+  const recent = listings?.slice(5) || [];
 
   return (
     <AppShell>
@@ -37,17 +37,14 @@ function Home() {
           className="absolute inset-0 opacity-40 mix-blend-screen bg-cover bg-center"
           style={{ backgroundImage: `url(${heroBg.url})` }}
         />
-        <div className="absolute inset-0 opacity-30 mix-blend-overlay" style={{
-          backgroundImage: "radial-gradient(circle at 20% 20%, oklch(0.9 0.15 82 / 0.5), transparent 50%), radial-gradient(circle at 80% 60%, oklch(0.7 0.2 155 / 0.4), transparent 50%)"
-        }} />
-        <div className="relative mx-auto max-w-7xl px-4 py-20 text-center text-white">
+        <div className="relative mx-auto max-w-7xl px-4 py-16 text-center text-white">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur mb-6 animate-fade-up">
             <Sparkles className="size-4" /> <span className="text-sm font-medium">Live updates • Real-time listings</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-black mb-4 animate-fade-up leading-tight">
+          <h1 className="text-3xl md:text-6xl font-black mb-4 animate-fade-up leading-tight">
             Everything you need, <span className="text-gold">in one place</span>
           </h1>
-          <p className="text-lg md:text-xl text-white/85 max-w-2xl mx-auto mb-8 animate-fade-up">
+          <p className="text-base md:text-xl text-white/85 max-w-2xl mx-auto mb-8 animate-fade-up">
             Buy & sell across all 58 Algerian wilayas — cars, real estate, phones, jobs and more.
           </p>
 
@@ -65,7 +62,7 @@ function Home() {
             <Button type="submit" className="btn-gold rounded-xl px-6">Search</Button>
           </form>
 
-          <div className="mt-10 flex items-center justify-center gap-8 text-sm text-white/80">
+          <div className="mt-8 flex items-center justify-center gap-4 md:gap-8 text-xs md:text-sm text-white/80 flex-wrap">
             <div className="flex items-center gap-2"><Shield className="size-4" /> Verified ads</div>
             <div className="flex items-center gap-2"><TrendingUp className="size-4" /> Real-time</div>
             <div className="flex items-center gap-2"><Sparkles className="size-4" /> 100% Free</div>
@@ -73,63 +70,88 @@ function Home() {
         </div>
       </section>
 
-      {/* CATEGORIES */}
-      <section className="mx-auto max-w-7xl px-4 py-14">
-        <div className="flex items-end justify-between mb-6">
+      {/* CATEGORIES — horizontal scroll */}
+      <section className="mx-auto max-w-7xl px-4 py-8">
+        <div className="flex items-end justify-between mb-4">
           <div>
-            <h2 className="text-2xl md:text-3xl font-black">Browse by Category</h2>
-            <p className="text-muted-foreground text-sm mt-1">Find exactly what you're looking for</p>
+            <h2 className="text-xl md:text-3xl font-black">Browse by Category</h2>
+            <p className="text-muted-foreground text-xs md:text-sm mt-1">Swipe to explore all categories</p>
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 gap-4">
-          {CATEGORIES.map((cat, i) => (
-            <Link
-              key={cat.id}
-              to="/category/$id"
-              params={{ id: cat.id }}
-              className="group card-elevated p-4 flex flex-col items-center gap-3 text-center animate-fade-up hover:-translate-y-1 transition-transform"
-              style={{ animationDelay: `${i * 40}ms` }}
-            >
-              <div
-                className="size-20 rounded-2xl flex items-center justify-center overflow-hidden relative"
-                style={{
-                  background: `radial-gradient(circle at 30% 20%, color-mix(in oklab, ${cat.color} 30%, transparent), color-mix(in oklab, ${cat.color} 8%, transparent))`,
-                  boxShadow: `0 10px 30px -12px color-mix(in oklab, ${cat.color} 45%, transparent)`,
-                }}
+        <div className="-mx-4 px-4 overflow-x-auto no-scrollbar">
+          <div className="flex gap-3 pb-2 snap-x snap-mandatory">
+            {CATEGORIES.map((cat, i) => (
+              <Link
+                key={cat.id}
+                to="/category/$id"
+                params={{ id: cat.id }}
+                className="group card-elevated p-3 flex flex-col items-center gap-2 text-center animate-fade-up hover:-translate-y-1 transition-transform shrink-0 w-28 md:w-36 snap-start"
+                style={{ animationDelay: `${i * 40}ms` }}
               >
-                <img
-                  src={cat.img}
-                  alt={cat.name}
-                  loading="lazy"
-                  className="size-16 object-contain drop-shadow-xl group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500"
-                />
-              </div>
-              <div className="text-sm font-bold line-clamp-1">{cat.name}</div>
-              <div className="text-[10px] text-muted-foreground line-clamp-1">{cat.nameAr}</div>
-            </Link>
-          ))}
+                <div
+                  className="size-16 md:size-20 rounded-2xl flex items-center justify-center overflow-hidden relative"
+                  style={{
+                    background: `radial-gradient(circle at 30% 20%, color-mix(in oklab, ${cat.color} 30%, transparent), color-mix(in oklab, ${cat.color} 8%, transparent))`,
+                    boxShadow: `0 10px 30px -12px color-mix(in oklab, ${cat.color} 45%, transparent)`,
+                  }}
+                >
+                  <img
+                    src={cat.img}
+                    alt={cat.name}
+                    loading="lazy"
+                    className="size-12 md:size-16 object-contain drop-shadow-xl group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500"
+                  />
+                </div>
+                <div className="text-xs md:text-sm font-bold line-clamp-1 w-full">{cat.name}</div>
+                <div className="text-[10px] text-muted-foreground line-clamp-1 w-full">{cat.nameAr}</div>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* FEATURED */}
+      {/* FEATURED — horizontal scroll, 5 items */}
       {featured.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 py-8">
-          <div className="flex items-end justify-between mb-6">
+        <section className="mx-auto max-w-7xl px-4 py-4">
+          <div className="flex items-end justify-between mb-4">
             <div>
-              <h2 className="text-2xl md:text-3xl font-black flex items-center gap-2">
-                <Sparkles className="text-gold" /> Featured Ads
+              <h2 className="text-xl md:text-3xl font-black flex items-center gap-2">
+                <Flame className="text-gold" /> Hot Ads
               </h2>
-              <p className="text-muted-foreground text-sm mt-1">Latest approved listings</p>
+              <p className="text-muted-foreground text-xs md:text-sm mt-1">Swipe to see more</p>
             </div>
-            <Link to="/browse" className="text-sm font-bold text-primary hover:underline">View all →</Link>
+            <Link to="/browse" className="text-sm font-bold text-primary hover:underline shrink-0">View all →</Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {featured.map((l) => <ListingCard key={l.id} listing={l} />)}
+          <div className="-mx-4 px-4 overflow-x-auto no-scrollbar">
+            <div className="flex gap-4 pb-2 snap-x snap-mandatory">
+              {featured.map((l) => (
+                <div key={l.id} className="w-64 md:w-72 shrink-0 snap-start">
+                  <ListingCard listing={l} />
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       )}
 
-      {/* RECENT / EMPTY */}
+      {/* RECENT — grid, appears on scroll */}
+      {recent.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-8">
+          <div className="flex items-end justify-between mb-4">
+            <div>
+              <h2 className="text-xl md:text-3xl font-black flex items-center gap-2">
+                <Sparkles className="text-primary" /> Latest Ads
+              </h2>
+              <p className="text-muted-foreground text-xs md:text-sm mt-1">Fresh listings from the community</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {recent.map((l) => <ListingCard key={l.id} listing={l} />)}
+          </div>
+        </section>
+      )}
+
+      {/* SKELETON / EMPTY */}
       <section className="mx-auto max-w-7xl px-4 py-8">
         {listings === null && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

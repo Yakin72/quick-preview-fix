@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SwipeRouteImport } from './routes/swipe'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PostRouteImport } from './routes/post'
 import { Route as BrowseRouteImport } from './routes/browse'
@@ -19,6 +20,11 @@ import { Route as ListingIdRouteImport } from './routes/listing.$id'
 import { Route as CategoryIdRouteImport } from './routes/category.$id'
 import { Route as ApiPublicFirebaseConfigRouteImport } from './routes/api/public/firebase-config'
 
+const SwipeRoute = SwipeRouteImport.update({
+  id: '/swipe',
+  path: '/swipe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/browse': typeof BrowseRoute
   '/post': typeof PostRoute
   '/profile': typeof ProfileRoute
+  '/swipe': typeof SwipeRoute
   '/category/$id': typeof CategoryIdRoute
   '/listing/$id': typeof ListingIdRoute
   '/api/public/firebase-config': typeof ApiPublicFirebaseConfigRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/browse': typeof BrowseRoute
   '/post': typeof PostRoute
   '/profile': typeof ProfileRoute
+  '/swipe': typeof SwipeRoute
   '/category/$id': typeof CategoryIdRoute
   '/listing/$id': typeof ListingIdRoute
   '/api/public/firebase-config': typeof ApiPublicFirebaseConfigRoute
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/browse': typeof BrowseRoute
   '/post': typeof PostRoute
   '/profile': typeof ProfileRoute
+  '/swipe': typeof SwipeRoute
   '/category/$id': typeof CategoryIdRoute
   '/listing/$id': typeof ListingIdRoute
   '/api/public/firebase-config': typeof ApiPublicFirebaseConfigRoute
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/post'
     | '/profile'
+    | '/swipe'
     | '/category/$id'
     | '/listing/$id'
     | '/api/public/firebase-config'
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/post'
     | '/profile'
+    | '/swipe'
     | '/category/$id'
     | '/listing/$id'
     | '/api/public/firebase-config'
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/post'
     | '/profile'
+    | '/swipe'
     | '/category/$id'
     | '/listing/$id'
     | '/api/public/firebase-config'
@@ -142,6 +154,7 @@ export interface RootRouteChildren {
   BrowseRoute: typeof BrowseRoute
   PostRoute: typeof PostRoute
   ProfileRoute: typeof ProfileRoute
+  SwipeRoute: typeof SwipeRoute
   CategoryIdRoute: typeof CategoryIdRoute
   ListingIdRoute: typeof ListingIdRoute
   ApiPublicFirebaseConfigRoute: typeof ApiPublicFirebaseConfigRoute
@@ -149,6 +162,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/swipe': {
+      id: '/swipe'
+      path: '/swipe'
+      fullPath: '/swipe'
+      preLoaderRoute: typeof SwipeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -222,6 +242,7 @@ const rootRouteChildren: RootRouteChildren = {
   BrowseRoute: BrowseRoute,
   PostRoute: PostRoute,
   ProfileRoute: ProfileRoute,
+  SwipeRoute: SwipeRoute,
   CategoryIdRoute: CategoryIdRoute,
   ListingIdRoute: ListingIdRoute,
   ApiPublicFirebaseConfigRoute: ApiPublicFirebaseConfigRoute,
