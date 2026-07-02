@@ -83,6 +83,34 @@ function ListingPage() {
   };
 
   const canManage = isAdmin || user?.uid === listing.ownerUid;
+  const canSwap = !!user && user.uid !== listing.ownerUid;
+
+  const handleSwap = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) { navigate({ to: "/auth" }); return; }
+    if (!swapText.trim() || swapSending) return;
+    setSwapSending(true);
+    try {
+      const conversationId = await startConversation({
+        listingId: listing.id,
+        listingTitle: listing.title,
+        fromUid: user.uid,
+        fromName: user.displayName || user.email || "User",
+        toUid: listing.ownerUid,
+        toName: listing.ownerName || "Seller",
+      });
+      await sendMessage(conversationId, user.uid, user.displayName || user.email || "User", swapText.trim());
+      setSwapText("");
+      toast.success("Reply sent to the seller", {
+        action: { label: "Open chat", onClick: () => navigate({ to: "/profile", search: { tab: "messages", conversation: conversationId } as any }) },
+      });
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to send");
+    } finally {
+      setSwapSending(false);
+    }
+  };
+
   const fullDate = new Date(listing.createdAt).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" });
   const timeAgo = (ts: number) => {
     const diff = Date.now() - ts;
