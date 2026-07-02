@@ -127,8 +127,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               Browse
             </Link>
             {user && (
-              <Link to="/profile" search={{ tab: "messages" } as any} className="px-3 py-2 rounded-lg hover:bg-accent transition flex items-center gap-1">
+              <Link to="/profile" search={{ tab: "messages" } as any} className="relative px-3 py-2 rounded-lg hover:bg-accent transition flex items-center gap-1">
                 <MessageSquare className="size-4" /> Messages
+                {unreadMessages > 0 && <span className="absolute -top-0.5 right-1 size-2.5 rounded-full bg-red-500 ring-2 ring-surface" />}
               </Link>
             )}
           </nav>
@@ -136,8 +137,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="flex-1" />
 
           {user && (
-            <Button variant="ghost" size="icon" className="hidden sm:inline-flex" onClick={() => navigate({ to: "/profile", search: { tab: "notifications" } as any })} aria-label="Notifications">
+            <Button variant="ghost" size="icon" className="relative hidden sm:inline-flex" onClick={() => navigate({ to: "/profile", search: { tab: "notifications" } as any })} aria-label="Notifications">
               <Bell className="size-5" />
+              {unreadNotifications > 0 && <span className="absolute top-1.5 right-1.5 size-2.5 rounded-full bg-red-500 ring-2 ring-surface" />}
             </Button>
           )}
 
