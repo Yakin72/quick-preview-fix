@@ -251,14 +251,14 @@ export async function startConversation(input: {
   const convRef = ref(f.db, `conversations/${id}`);
   const snap = await get(convRef);
   if (!snap.exists()) {
-    const payload: Omit<Conversation, "id"> = {
+    const payload: Record<string, any> = {
       members: { [input.fromUid]: true, [input.toUid]: true },
       memberNames: { [input.fromUid]: input.fromName, [input.toUid]: input.toName },
-      listingId: input.listingId,
-      listingTitle: input.listingTitle,
       lastAt: Date.now(),
       unread: { [input.fromUid]: 0, [input.toUid]: 0 },
     };
+    if (input.listingId) payload.listingId = input.listingId;
+    if (input.listingTitle) payload.listingTitle = input.listingTitle;
     await set(convRef, payload);
     await set(ref(f.db, `userConversations/${input.fromUid}/${id}`), true);
     await set(ref(f.db, `userConversations/${input.toUid}/${id}`), true);
