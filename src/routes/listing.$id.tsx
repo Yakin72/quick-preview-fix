@@ -245,7 +245,38 @@ function ListingPage() {
               </div>
             </div>
 
-            {/* SIMILAR ADS */}
+            {/* SWAP: inline reply to the ad */}
+            {user?.uid !== listing.ownerUid && (
+              <div className="card-elevated p-6 border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-gold/5">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="size-9 rounded-xl btn-hero flex items-center justify-center text-primary-foreground">
+                    <MessageCircle className="size-4" />
+                  </div>
+                  <div>
+                    <h2 className="font-black">Reply to this ad</h2>
+                    <p className="text-xs text-muted-foreground">Your message goes straight to {listing.ownerName || "the seller"} as a chat.</p>
+                  </div>
+                </div>
+                <form onSubmit={handleSwap} className="space-y-2">
+                  <Textarea
+                    value={swapText}
+                    onChange={(e) => setSwapText(e.target.value)}
+                    placeholder={user ? `Hi, is "${listing.title}" still available?` : "Sign in to send a reply"}
+                    disabled={!canSwap || swapSending}
+                    rows={3}
+                    maxLength={800}
+                  />
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[11px] text-muted-foreground">Sends privately in E-souq messages.</span>
+                    <Button type="submit" disabled={!canSwap || !swapText.trim() || swapSending} className="btn-hero rounded-xl gap-2">
+                      <MessageCircle className="size-4" /> {swapSending ? "Sending..." : "Send reply"}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+
             {similar.length > 0 && (
               <div>
                 <h2 className="text-xl font-black mb-4">Similar Ads</h2>
