@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useTheme } from "@/lib/theme";
 import { CATEGORIES } from "@/lib/wilayas";
+import { useNotifications, useConversations } from "@/lib/db-hooks";
 import logoAsset from "@/assets/esouq-logo-clean.png.asset.json";
 import storeIconAsset from "@/assets/esouq-store-logo.png.asset.json";
 import { useState, type ReactNode } from "react";
@@ -15,6 +16,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { theme, toggle } = useTheme();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const notifications = useNotifications(user?.uid);
+  const conversations = useConversations(user?.uid);
+  const unreadNotifications = notifications.filter((n) => !n.read).length;
+  const unreadMessages = user ? conversations.reduce((s, c) => s + (c.unread?.[user.uid] || 0), 0) : 0;
 
   const close = () => setOpen(false);
 
@@ -122,8 +127,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               Browse
             </Link>
             {user && (
-              <Link to="/profile" search={{ tab: "messages" } as any} className="px-3 py-2 rounded-lg hover:bg-accent transition flex items-center gap-1">
+              <Link to="/profile" search={{ tab: "messages" } as any} className="relative px-3 py-2 rounded-lg hover:bg-accent transition flex items-center gap-1">
                 <MessageSquare className="size-4" /> Messages
+                {unreadMessages > 0 && <span className="absolute -top-0.5 right-1 size-2.5 rounded-full bg-red-500 ring-2 ring-surface" />}
               </Link>
             )}
           </nav>
@@ -131,8 +137,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="flex-1" />
 
           {user && (
-            <Button variant="ghost" size="icon" className="hidden sm:inline-flex" onClick={() => navigate({ to: "/profile", search: { tab: "notifications" } as any })} aria-label="Notifications">
+            <Button variant="ghost" size="icon" className="relative hidden sm:inline-flex" onClick={() => navigate({ to: "/profile", search: { tab: "notifications" } as any })} aria-label="Notifications">
               <Bell className="size-5" />
+              {unreadNotifications > 0 && <span className="absolute top-1.5 right-1.5 size-2.5 rounded-full bg-red-500 ring-2 ring-surface" />}
             </Button>
           )}
 

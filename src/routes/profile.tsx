@@ -34,10 +34,15 @@ function ProfilePage() {
 
   const selectedConversation = conversation || conversations[0]?.id;
   const messages = useMessages(selectedConversation);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (user?.uid && selectedConversation) markConversationRead(selectedConversation, user.uid).catch(() => {});
   }, [selectedConversation, user?.uid]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages.length, selectedConversation]);
 
   if (loading) return <AppShell><div className="mx-auto max-w-2xl px-4 py-16 text-center">...</div></AppShell>;
   if (!user) return <AppShell><div className="mx-auto max-w-md card-elevated p-8 my-16 text-center"><h2 className="text-xl font-bold mb-4">Sign In Required</h2><Link to="/auth"><Button className="btn-hero rounded-xl">Sign In</Button></Link></div></AppShell>;
@@ -157,7 +162,7 @@ function ProfilePage() {
               ) : (
                 <>
                   <div className="p-4 border-b border-border font-bold">{conversations.find((c) => c.id === selectedConversation)?.listingTitle || "Conversation"}</div>
-                  <div className="flex-1 p-4 space-y-3 overflow-y-auto max-h-[420px] bg-muted/25">
+                  <div className="flex-1 p-4 space-y-3 overflow-y-auto max-h-[420px] bg-muted/25 flex flex-col">
                     {messages.map((m) => (
                       <div key={m.id} className={`flex ${m.uid === user.uid ? "justify-end" : "justify-start"}`}>
                         <div className={`max-w-[78%] rounded-2xl px-4 py-2 text-sm ${m.uid === user.uid ? "btn-hero text-primary-foreground" : "bg-card border border-border"}`}>
@@ -166,6 +171,7 @@ function ProfilePage() {
                         </div>
                       </div>
                     ))}
+                    <div ref={messagesEndRef} />
                   </div>
                   <form onSubmit={sendCurrentMessage} className="p-3 border-t border-border flex gap-2">
                     <Input value={messageText} onChange={(e) => setMessageText(e.target.value)} placeholder="Write a message..." className="h-11" maxLength={800} />

@@ -34,15 +34,19 @@ function UserProfilePage() {
   }
 
   const messageSeller = async () => {
-    if (!user) return navigate({ to: "/auth" });
-    if (user.uid === uid) return navigate({ to: "/profile", search: { tab: "messages" } as any });
-    const conversation = await startConversation({
-      fromUid: user.uid,
-      fromName: user.displayName || user.email || "User",
-      toUid: uid,
-      toName: name,
-    });
-    navigate({ to: "/profile", search: { tab: "messages", conversation } as any });
+    if (!user) { navigate({ to: "/auth" }); return; }
+    if (user.uid === uid) { navigate({ to: "/profile", search: { tab: "messages" } as any }); return; }
+    try {
+      const conversation = await startConversation({
+        fromUid: user.uid,
+        fromName: user.displayName || user.email || "User",
+        toUid: uid,
+        toName: name,
+      });
+      navigate({ to: "/profile", search: { tab: "messages", conversation } as any });
+    } catch (e: any) {
+      toast.error(e?.message || "Could not start conversation");
+    }
   };
 
   const submitRating = async (rating: number) => {
