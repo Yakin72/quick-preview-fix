@@ -87,15 +87,20 @@ function Home() {
                 key={cat.id}
                 to="/category/$id"
                 params={{ id: cat.id }}
-                className="group p-3 flex flex-col items-center gap-2 text-center animate-fade-up shrink-0 w-28 md:w-36 snap-start"
+                className="group card-elevated border border-border/60 bg-card p-3 flex flex-col items-center gap-2 text-center animate-fade-up shrink-0 w-28 md:w-36 snap-start rounded-2xl hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
                 style={{ animationDelay: `${i * 40}ms` }}
               >
-                <div className="size-16 md:size-20 flex items-center justify-center">
+                <div className="size-16 md:size-20 flex items-center justify-center relative">
+                  {/* glow on hover */}
+                  <div
+                    className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl"
+                    style={{ background: `radial-gradient(circle, ${cat.color} 0%, transparent 70%)` }}
+                  />
                   <img
                     src={cat.img}
                     alt={cat.name}
                     loading="lazy"
-                    className="size-full object-contain"
+                    className="relative size-full object-contain transition-transform duration-500 ease-out group-hover:scale-125"
                   />
                 </div>
                 <div className="text-xs md:text-sm font-bold line-clamp-1 w-full">{cat.name}</div>
