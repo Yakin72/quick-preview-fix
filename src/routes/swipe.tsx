@@ -1,12 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import { useListings, toggleLike, toggleSaved, type Listing } from "@/lib/db-hooks";
+import { useListings, toggleLike, toggleSaved, startConversation, sendMessage, type Listing } from "@/lib/db-hooks";
 import { useAuth } from "@/lib/auth-context";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform, type PanInfo } from "framer-motion";
-import { Heart, X, Bookmark, MapPin, RotateCcw, Sparkles } from "lucide-react";
+import { Heart, X, Bookmark, MapPin, RotateCcw, Sparkles, MessageCircle, Send } from "lucide-react";
 import { CATEGORIES } from "@/lib/wilayas";
 import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/swipe")({
   head: () => ({
@@ -18,7 +20,7 @@ export const Route = createFileRoute("/swipe")({
   component: SwipePage,
 });
 
-type Action = "like" | "pass" | "save";
+type Action = "like" | "pass" | "save" | "reply";
 
 function SwipePage() {
   const listings = useListings({ approvedOnly: true });
@@ -27,6 +29,9 @@ function SwipePage() {
   const [index, setIndex] = useState(0);
   const [history, setHistory] = useState<{ id: string; action: Action }[]>([]);
   const [lastAction, setLastAction] = useState<Action | null>(null);
+  const [replyFor, setReplyFor] = useState<Listing | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [replySending, setReplySending] = useState(false);
 
   const deck = useMemo(() => listings || [], [listings]);
   const current = deck[index];
@@ -34,8 +39,47 @@ function SwipePage() {
 
   useEffect(() => { setIndex(0); setHistory([]); }, [deck.length]);
 
+  const openReply = (listing: Listing) => {
+    if (!user) {
+      toast.message("Sign in to reply", { action: { label: "Sign in", onClick: () => navigate({ to: "/auth" }) } });
+      return;
+    }
+    if (user.uid === listing.ownerUid) {
+      toast.message("This is your own ad");
+      return;
+    }
+    setReplyFor(listing);
+    setReplyText("");
+  };
+
+  const sendReply = async () => {
+    if (!user || !replyFor || !replyText.trim() || replySending) return;
+    setReplySending(true);
+    try {
+      const conversationId = await startConversation({
+        listingId: replyFor.id,
+        listingTitle: replyFor.title,
+        fromUid: user.uid,
+        fromName: user.displayName || user.email || "User",
+        toUid: replyFor.ownerUid,
+        toName: replyFor.ownerName || "Seller",
+      });
+      await sendMessage(conversationId, user.uid, user.displayName || user.email || "User", replyText.trim());
+      toast.success("Reply sent", {
+        action: { label: "Open chat", onClick: () => navigate({ to: "/profile", search: { tab: "messages", conversation: conversationId } as any }) },
+      });
+      setReplyFor(null);
+      setReplyText("");
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to send");
+    } finally {
+      setReplySending(false);
+    }
+  };
+
   const doAction = async (action: Action) => {
     if (!current) return;
+    if (action === "reply") { openReply(current); return; }
     setLastAction(action);
     setHistory((h) => [...h, { id: current.id, action }]);
     setIndex((i) => i + 1);
@@ -70,7 +114,7 @@ function SwipePage() {
             <h1 className="text-2xl font-black flex items-center gap-2">
               <Sparkles className="text-gold" /> اكتشف
             </h1>
-            <p className="text-xs text-muted-foreground mt-1">اسحب يمين ❤️ · يسار ✕ · فوق 🔖</p>
+            <p className="text-xs text-muted-foreground mt-1">يمين ❤️ · يسار ✕ · فوق 🔖 · تحت 💬 للرد</p>
           </div>
           <button
             onClick={undo}
@@ -123,6 +167,7 @@ function SwipePage() {
                 {lastAction === "like" && <Heart className="size-32 text-red-500 fill-red-500 drop-shadow-2xl" />}
                 {lastAction === "pass" && <X className="size-32 text-white bg-slate-800/70 rounded-full p-4 drop-shadow-2xl" strokeWidth={3} />}
                 {lastAction === "save" && <Bookmark className="size-32 text-gold fill-gold drop-shadow-2xl" />}
+                {lastAction === "reply" && <MessageCircle className="size-32 text-primary fill-primary/30 drop-shadow-2xl" />}
               </motion.div>
             )}
           </AnimatePresence>
@@ -130,15 +175,18 @@ function SwipePage() {
 
         {/* Action buttons */}
         {current && (
-          <div className="flex items-center justify-center gap-4 mt-6">
+          <div className="flex items-center justify-center gap-3 mt-6">
             <ActionBtn color="bg-red-500/10 text-red-500 border-red-500/30" onClick={() => doAction("pass")} label="تخطي">
-              <X className="size-7" strokeWidth={3} />
+              <X className="size-6" strokeWidth={3} />
+            </ActionBtn>
+            <ActionBtn color="bg-primary/10 text-primary border-primary/30" onClick={() => doAction("reply")} label="رد">
+              <MessageCircle className="size-6" />
             </ActionBtn>
             <ActionBtn color="bg-gold/10 text-gold border-gold/30" onClick={() => doAction("save")} label="حفظ" big>
               <Bookmark className="size-8" />
             </ActionBtn>
             <ActionBtn color="bg-green-500/10 text-green-500 border-green-500/30" onClick={() => doAction("like")} label="إعجاب">
-              <Heart className="size-7 fill-current" />
+              <Heart className="size-6 fill-current" />
             </ActionBtn>
           </div>
         )}
@@ -147,6 +195,67 @@ function SwipePage() {
           {deck.length > 0 && `${Math.min(index, deck.length)} / ${deck.length}`}
         </p>
       </section>
+
+      {/* Reply sheet */}
+      <AnimatePresence>
+        {replyFor && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => !replySending && setReplyFor(null)}
+              className="fixed inset-0 bg-black/50 z-40"
+            />
+            <motion.div
+              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 260, damping: 26 }}
+              className="fixed left-0 right-0 bottom-0 z-50 bg-surface border-t border-border rounded-t-3xl p-5 pb-8 shadow-2xl max-w-md mx-auto"
+            >
+              <div className="w-12 h-1.5 rounded-full bg-muted mx-auto mb-4" />
+              <div className="flex items-center gap-3 mb-3">
+                <img
+                  src={replyFor.images?.[0] || `https://picsum.photos/seed/${replyFor.id}/80/80`}
+                  alt=""
+                  className="size-12 rounded-xl object-cover"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="text-[11px] uppercase tracking-wider text-primary font-bold">Reply to ad</div>
+                  <div className="font-bold text-sm truncate">{replyFor.title}</div>
+                  <div className="text-xs text-muted-foreground truncate">to {replyFor.ownerName || "Seller"}</div>
+                </div>
+              </div>
+              <Textarea
+                autoFocus
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder={`Hi, is "${replyFor.title}" still available?`}
+                rows={3}
+                maxLength={800}
+                disabled={replySending}
+                className="mb-3"
+              />
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1 rounded-xl"
+                  onClick={() => setReplyFor(null)}
+                  disabled={replySending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  className="flex-1 btn-hero rounded-xl gap-2"
+                  onClick={sendReply}
+                  disabled={!replyText.trim() || replySending}
+                >
+                  <Send className="size-4" /> {replySending ? "Sending..." : "Send"}
+                </Button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </AppShell>
   );
 }
@@ -170,13 +279,15 @@ function SwipeCard({ listing, onAction }: { listing: Listing; onAction: (a: Acti
   const likeOpacity = useTransform(x, [20, 140], [0, 1]);
   const passOpacity = useTransform(x, [-140, -20], [1, 0]);
   const saveOpacity = useTransform(y, [-140, -20], [1, 0]);
+  const replyOpacity = useTransform(y, [20, 140], [0, 1]);
 
   const onDragEnd = (_: any, info: PanInfo) => {
     const { offset, velocity } = info;
     const swipe = Math.abs(offset.x) * 0.5 + Math.abs(velocity.x) * 0.05;
+    if (offset.y > 120 || velocity.y > 600) { onAction("reply"); y.set(0); x.set(0); return; }
     if (offset.y < -120 || velocity.y < -600) return onAction("save");
-    if (offset.x > 120 || (offset.x > 60 && velocity.x > 400) || swipe > 200 && offset.x > 0) return onAction("like");
-    if (offset.x < -120 || (offset.x < -60 && velocity.x < -400) || swipe > 200 && offset.x < 0) return onAction("pass");
+    if (offset.x > 120 || (offset.x > 60 && velocity.x > 400) || (swipe > 200 && offset.x > 0)) return onAction("like");
+    if (offset.x < -120 || (offset.x < -60 && velocity.x < -400) || (swipe > 200 && offset.x < 0)) return onAction("pass");
   };
 
   return (
@@ -188,7 +299,7 @@ function SwipeCard({ listing, onAction }: { listing: Listing; onAction: (a: Acti
       onDragEnd={onDragEnd}
       initial={{ scale: 0.9, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      exit={{ x: x.get() > 0 ? 800 : x.get() < 0 ? -800 : 0, y: y.get() < 0 ? -800 : 0, opacity: 0, transition: { duration: 0.35 } }}
+      exit={{ x: x.get() > 0 ? 800 : x.get() < 0 ? -800 : 0, y: y.get() < -50 ? -800 : 0, opacity: 0, transition: { duration: 0.35 } }}
       transition={{ type: "spring", stiffness: 260, damping: 22 }}
       className="absolute inset-0 cursor-grab active:cursor-grabbing z-20"
       whileTap={{ cursor: "grabbing" }}
@@ -202,6 +313,9 @@ function SwipeCard({ listing, onAction }: { listing: Listing; onAction: (a: Acti
         </motion.div>
         <motion.div style={{ opacity: saveOpacity }} className="absolute top-1/3 left-1/2 -translate-x-1/2 border-4 border-gold text-gold px-4 py-1.5 rounded-xl font-black text-2xl bg-white/90">
           SAVE
+        </motion.div>
+        <motion.div style={{ opacity: replyOpacity }} className="absolute bottom-24 left-1/2 -translate-x-1/2 border-4 border-primary text-primary px-4 py-1.5 rounded-xl font-black text-2xl bg-white/90 flex items-center gap-2">
+          <MessageCircle className="size-6" /> REPLY
         </motion.div>
       </Card>
     </motion.div>
