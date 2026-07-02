@@ -66,7 +66,7 @@ function AuthPage() {
       <div className="mx-auto max-w-md px-4 py-12">
         <div className="card-elevated p-8">
           <div className="text-center mb-6">
-            <img src={logoAsset.url} alt="ALGZONE" className="mx-auto mb-3 size-16 rounded-2xl bg-transparent p-2 shadow-md" />
+            <img src={logoAsset.url} alt="ALGZONE" className="mx-auto mb-3 size-16" />
             <h1 className="text-2xl font-black">{mode === "in" ? "Welcome Back" : "Create Account"}</h1>
             <p className="text-sm text-muted-foreground mt-1">
               {mode === "in" ? "Sign in to continue" : "Join the ALGZONE community"}
