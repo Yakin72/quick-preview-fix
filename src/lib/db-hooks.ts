@@ -79,12 +79,20 @@ export type Conversation = {
   unread?: Record<string, number>;
 };
 
+export type MessageAttachment = {
+  listingId: string;
+  title: string;
+  image?: string;
+  price?: number;
+};
+
 export type Message = {
   id: string;
   uid: string;
   name: string;
   text: string;
   ts: number;
+  attachment?: MessageAttachment;
 };
 
 export function useListings(opts?: { category?: string; approvedOnly?: boolean; ownerUid?: string }) {
@@ -306,12 +314,19 @@ export function useMessages(conversationId: string | undefined) {
   return data;
 }
 
-export async function sendMessage(conversationId: string, uid: string, name: string, text: string) {
+export async function sendMessage(conversationId: string, uid: string, name: string, text: string, attachment?: MessageAttachment) {
   const f = await getFirebase();
   const clean = text.trim();
-  if (!clean) return;
+  if (!clean && !attachment) return;
   const ts = Date.now();
-  await set(push(ref(f.db, `messages/${conversationId}`)), { uid, name, text: clean, ts });
+  const msg: Record<string, any> = { uid, name, text: clean, ts };
+  if (attachment) {
+    const a: Record<string, any> = { listingId: attachment.listingId, title: attachment.title };
+    if (attachment.image) a.image = attachment.image;
+    if (typeof attachment.price === "number") a.price = attachment.price;
+    msg.attachment = a;
+  }
+  await set(push(ref(f.db, `messages/${conversationId}`)), msg);
   const convSnap = await get(ref(f.db, `conversations/${conversationId}`));
   const conv = convSnap.val() as Conversation | null;
   if (!conv) return;

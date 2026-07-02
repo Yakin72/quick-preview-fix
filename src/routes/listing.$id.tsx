@@ -99,7 +99,12 @@ function ListingPage() {
         toUid: listing.ownerUid,
         toName: listing.ownerName || "Seller",
       });
-      await sendMessage(conversationId, user.uid, user.displayName || user.email || "User", swapText.trim());
+      await sendMessage(conversationId, user.uid, user.displayName || user.email || "User", swapText.trim(), {
+        listingId: listing.id,
+        title: listing.title,
+        image: listing.images?.[0],
+        price: listing.price,
+      });
       setSwapText("");
       toast.success("Reply sent to the seller", {
         action: { label: "Open chat", onClick: () => navigate({ to: "/profile", search: { tab: "messages", conversation: conversationId } as any }) },

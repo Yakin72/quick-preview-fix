@@ -64,7 +64,12 @@ function SwipePage() {
         toUid: replyFor.ownerUid,
         toName: replyFor.ownerName || "Seller",
       });
-      await sendMessage(conversationId, user.uid, user.displayName || user.email || "User", replyText.trim());
+      await sendMessage(conversationId, user.uid, user.displayName || user.email || "User", replyText.trim(), {
+        listingId: replyFor.id,
+        title: replyFor.title,
+        image: replyFor.images?.[0],
+        price: replyFor.price,
+      });
       toast.success("Reply sent", {
         action: { label: "Open chat", onClick: () => navigate({ to: "/profile", search: { tab: "messages", conversation: conversationId } as any }) },
       });

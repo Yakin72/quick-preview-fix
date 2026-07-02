@@ -167,7 +167,26 @@ function ProfilePage() {
                       <div key={m.id} className={`flex ${m.uid === user.uid ? "justify-end" : "justify-start"}`}>
                         <div className={`max-w-[78%] rounded-2xl px-4 py-2 text-sm ${m.uid === user.uid ? "btn-hero text-primary-foreground" : "bg-card border border-border"}`}>
                           <div className="font-bold text-[11px] opacity-80 mb-0.5">{m.name}</div>
-                          <div>{m.text}</div>
+                          {m.attachment && (
+                            <Link
+                              to="/listing/$id"
+                              params={{ id: m.attachment.listingId }}
+                              className={`mb-2 flex gap-2 items-center rounded-xl overflow-hidden border ${m.uid === user.uid ? "border-primary-foreground/30 bg-primary-foreground/10" : "border-border bg-muted/40"} p-1.5 pr-3 hover:opacity-90 transition`}
+                            >
+                              <div className={`w-1 self-stretch rounded-full ${m.uid === user.uid ? "bg-primary-foreground/60" : "bg-primary/60"}`} />
+                              {m.attachment.image && (
+                                <img src={m.attachment.image} alt="" className="size-11 rounded-lg object-cover shrink-0" />
+                              )}
+                              <div className="min-w-0">
+                                <div className="text-[10px] uppercase tracking-wide opacity-70">Reply to ad</div>
+                                <div className="font-bold text-xs truncate">{m.attachment.title}</div>
+                                {typeof m.attachment.price === "number" && (
+                                  <div className="text-[11px] opacity-80">{m.attachment.price.toLocaleString()} DA</div>
+                                )}
+                              </div>
+                            </Link>
+                          )}
+                          {m.text && <div>{m.text}</div>}
                         </div>
                       </div>
                     ))}
