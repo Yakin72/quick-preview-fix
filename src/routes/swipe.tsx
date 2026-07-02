@@ -215,46 +215,48 @@ function SwipePage() {
               transition={{ type: "spring", stiffness: 260, damping: 26 }}
               className="fixed left-0 right-0 bottom-0 z-50 bg-surface border-t border-border rounded-t-3xl p-5 pb-8 shadow-2xl max-w-md mx-auto"
             >
-              <div className="w-12 h-1.5 rounded-full bg-muted mx-auto mb-4" />
-              <div className="flex items-center gap-3 mb-3">
-                <img
-                  src={replyFor.images?.[0] || `https://picsum.photos/seed/${replyFor.id}/80/80`}
-                  alt=""
-                  className="size-12 rounded-xl object-cover"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="text-[11px] uppercase tracking-wider text-primary font-bold">Reply to ad</div>
-                  <div className="font-bold text-sm truncate">{replyFor.title}</div>
-                  <div className="text-xs text-muted-foreground truncate">to {replyFor.ownerName || "Seller"}</div>
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <img
+                    src={replyFor.images?.[0] || `https://picsum.photos/seed/${replyFor.id}/80/80`}
+                    alt=""
+                    className="size-12 rounded-xl object-cover"
+                  />
+                  <div className="min-w-0">
+                    <div className="text-[11px] uppercase tracking-wider text-primary font-bold">Reply to ad</div>
+                    <div className="font-bold text-sm truncate">{replyFor.title}</div>
+                    <div className="text-xs text-muted-foreground truncate">to {replyFor.ownerName || "Seller"}</div>
+                  </div>
                 </div>
-              </div>
-              <Textarea
-                autoFocus
-                value={replyText}
-                onChange={(e) => setReplyText(e.target.value)}
-                placeholder={`Hi, is "${replyFor.title}" still available?`}
-                rows={3}
-                maxLength={800}
-                disabled={replySending}
-                className="mb-3"
-              />
-              <div className="flex gap-2">
-                <Button
+                <button
                   type="button"
-                  variant="outline"
-                  className="flex-1 rounded-xl"
-                  onClick={() => setReplyFor(null)}
+                  onClick={() => !replySending && setReplyFor(null)}
                   disabled={replySending}
+                  className="size-8 flex items-center justify-center rounded-full hover:bg-accent transition disabled:opacity-40"
+                  aria-label="Cancel"
                 >
-                  Cancel
-                </Button>
+                  <X className="size-5" />
+                </button>
+              </div>
+              <div className="relative">
+                <Textarea
+                  autoFocus
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  placeholder={`Hi, is "${replyFor.title}" still available?`}
+                  rows={3}
+                  maxLength={800}
+                  disabled={replySending}
+                  className="pr-14"
+                />
                 <Button
                   type="button"
-                  className="flex-1 btn-hero rounded-xl gap-2"
+                  size="icon"
+                  className="absolute right-2 bottom-2 rounded-full btn-hero size-10"
                   onClick={sendReply}
                   disabled={!replyText.trim() || replySending}
                 >
-                  <Send className="size-4" /> {replySending ? "Sending..." : "Send"}
+                  <Send className="size-4" />
                 </Button>
               </div>
             </motion.div>
