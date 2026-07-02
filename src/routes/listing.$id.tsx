@@ -30,6 +30,8 @@ function ListingPage() {
   const [showPhone, setShowPhone] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
+  const [swapText, setSwapText] = useState("");
+  const [swapSending, setSwapSending] = useState(false);
   const navigate = useNavigate();
   const all = useListings({ approvedOnly: true, category: listing?.category });
 
