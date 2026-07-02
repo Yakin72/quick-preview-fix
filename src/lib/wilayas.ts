@@ -60,16 +60,24 @@ export const WILAYAS: { code: string; name: string; communes: string[] }[] = [
   { code: "58", name: "المنيعة", communes: ["المنيعة", "حاسي القارة", "حاسي الفحل"] },
 ];
 
-const HF = "https://d8j0ntlcm91z4.cloudfront.net/user_390E2fHfWqZG96pLEnSA2qqfXoI";
+import catVehicles from "@/assets/cat-vehicles.png";
+import catRealestate from "@/assets/cat-realestate.png";
+import catElectronics from "@/assets/cat-electronics.png";
+import catHome from "@/assets/cat-home.png";
+import catFashion from "@/assets/cat-fashion.png";
+import catHobbies from "@/assets/cat-hobbies.png";
+import catJobs from "@/assets/cat-jobs.png";
+import catServices from "@/assets/cat-services.png";
+
 export const CATEGORIES = [
-  { id: "vehicles", name: "Cars & Vehicles", nameAr: "سيارات ومركبات", icon: "🚗", color: "oklch(0.65 0.18 25)", img: `${HF}/hf_20260630_013415_c4873971-e9cf-4751-951b-9a851e9b31c1_min.webp` },
-  { id: "realestate", name: "Real Estate", nameAr: "عقارات", icon: "🏠", color: "oklch(0.65 0.15 155)", img: `${HF}/hf_20260630_013433_849fd93b-411a-4521-a5b5-54a7c27b38a8_min.webp` },
-  { id: "electronics", name: "Phones, Tablets & Electronics", nameAr: "هواتف وإلكترونيات", icon: "📱", color: "oklch(0.65 0.18 265)", img: `${HF}/hf_20260630_013453_5ce847f8-7272-452d-9448-7a4cb8bc80e7_min.webp` },
-  { id: "home", name: "Home & Furniture", nameAr: "منزل وأثاث", icon: "🛋️", color: "oklch(0.65 0.15 85)", img: `${HF}/hf_20260630_013622_6fb30621-70bb-44f4-92b4-78a950bc1944_min.webp` },
-  { id: "fashion", name: "Fashion & Beauty", nameAr: "أزياء وموضة", icon: "👗", color: "oklch(0.7 0.18 340)", img: `${HF}/hf_20260630_013604_66108e3e-17d4-4e4c-b15c-e878ad9cb9be_min.webp` },
-  { id: "hobbies", name: "Hobbies, Sports & Pets", nameAr: "هوايات ورياضة", icon: "⚽", color: "oklch(0.62 0.16 145)", img: `${HF}/hf_20260630_013844_fd306686-ee87-429a-a904-43717b4e2259_min.webp` },
-  { id: "jobs", name: "Jobs & Business", nameAr: "وظائف وأعمال", icon: "💼", color: "oklch(0.6 0.15 55)", img: `${HF}/hf_20260630_013530_ce54c0d0-a42e-47a9-85be-db53a70918e8_min.webp` },
-  { id: "services", name: "Services", nameAr: "خدمات", icon: "🛠️", color: "oklch(0.6 0.13 210)", img: `${HF}/hf_20260630_013650_ee67533e-5b77-49e4-b099-9ef59bca020b_min.webp` },
+  { id: "vehicles", name: "Cars & Vehicles", nameAr: "سيارات ومركبات", icon: "🚗", color: "oklch(0.65 0.18 25)", img: catVehicles },
+  { id: "realestate", name: "Real Estate", nameAr: "عقارات", icon: "🏠", color: "oklch(0.65 0.15 155)", img: catRealestate },
+  { id: "electronics", name: "Phones, Tablets & Electronics", nameAr: "هواتف وإلكترونيات", icon: "📱", color: "oklch(0.65 0.18 265)", img: catElectronics },
+  { id: "home", name: "Home & Furniture", nameAr: "منزل وأثاث", icon: "🛋️", color: "oklch(0.65 0.15 85)", img: catHome },
+  { id: "fashion", name: "Fashion & Beauty", nameAr: "أزياء وموضة", icon: "👗", color: "oklch(0.7 0.18 340)", img: catFashion },
+  { id: "hobbies", name: "Hobbies, Sports & Pets", nameAr: "هوايات ورياضة", icon: "⚽", color: "oklch(0.62 0.16 145)", img: catHobbies },
+  { id: "jobs", name: "Jobs & Business", nameAr: "وظائف وأعمال", icon: "💼", color: "oklch(0.6 0.15 55)", img: catJobs },
+  { id: "services", name: "Services", nameAr: "خدمات", icon: "🛠️", color: "oklch(0.6 0.13 210)", img: catServices },
 ];
 
 export const SUBCATEGORIES: Record<string, string[]> = {

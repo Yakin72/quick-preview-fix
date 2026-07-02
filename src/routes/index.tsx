@@ -87,21 +87,15 @@ function Home() {
                 key={cat.id}
                 to="/category/$id"
                 params={{ id: cat.id }}
-                className="group card-elevated p-3 flex flex-col items-center gap-2 text-center animate-fade-up hover:-translate-y-1 transition-transform shrink-0 w-28 md:w-36 snap-start"
+                className="group p-3 flex flex-col items-center gap-2 text-center animate-fade-up shrink-0 w-28 md:w-36 snap-start"
                 style={{ animationDelay: `${i * 40}ms` }}
               >
-                <div
-                  className="size-16 md:size-20 rounded-2xl flex items-center justify-center overflow-hidden relative"
-                  style={{
-                    background: `radial-gradient(circle at 30% 20%, color-mix(in oklab, ${cat.color} 30%, transparent), color-mix(in oklab, ${cat.color} 8%, transparent))`,
-                    boxShadow: `0 10px 30px -12px color-mix(in oklab, ${cat.color} 45%, transparent)`,
-                  }}
-                >
+                <div className="size-16 md:size-20 flex items-center justify-center">
                   <img
                     src={cat.img}
                     alt={cat.name}
                     loading="lazy"
-                    className="size-12 md:size-16 object-contain drop-shadow-xl group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500"
+                    className="size-full object-contain"
                   />
                 </div>
                 <div className="text-xs md:text-sm font-bold line-clamp-1 w-full">{cat.name}</div>
