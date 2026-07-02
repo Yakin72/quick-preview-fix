@@ -16,6 +16,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { theme, toggle } = useTheme();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const notifications = useNotifications(user?.uid);
+  const conversations = useConversations(user?.uid);
+  const unreadNotifications = notifications.filter((n) => !n.read).length;
+  const unreadMessages = user ? conversations.reduce((s, c) => s + (c.unread?.[user.uid] || 0), 0) : 0;
 
   const close = () => setOpen(false);
 
