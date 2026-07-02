@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import {
   useListing, useComments, addComment, deleteComment, toggleLike, useLiked,
-  incrementViews, deleteListing, toggleSaved, useIsSaved, useListings, startConversation
+  incrementViews, deleteListing, toggleSaved, useIsSaved, useListings, startConversation, sendMessage
 } from "@/lib/db-hooks";
 import { useAuth } from "@/lib/auth-context";
 import { useEffect, useMemo, useState } from "react";
