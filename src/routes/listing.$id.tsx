@@ -272,7 +272,7 @@ function ListingPage() {
                     maxLength={800}
                   />
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] text-muted-foreground">Sends privately in E-souq messages.</span>
+                    <span className="text-[11px] text-muted-foreground">Sends privately in ALGZONE messages.</span>
                     <Button type="submit" disabled={!canSwap || !swapText.trim() || swapSending} className="btn-hero rounded-xl gap-2">
                       <MessageCircle className="size-4" /> {swapSending ? "Sending..." : "Send reply"}
                     </Button>
@@ -334,7 +334,7 @@ function ListingPage() {
                 </a>
 
                 <Button onClick={handleMessage} variant="outline" className="w-full h-11 rounded-xl gap-2">
-                  <MessageCircle className="size-4" /> Message in E-souq
+                  <MessageCircle className="size-4" /> Message in ALGZONE
                 </Button>
               </div>
 

@@ -13,8 +13,8 @@ import heroBg from "@/assets/maqam-echahid.jpeg.asset.json";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "E-souq — Algeria's #1 Classifieds Marketplace" },
-      { name: "description", content: "Buy & sell across all 58 wilayas: cars, real estate, phones, electronics, jobs and more on E-souq." },
+      { title: "ALGZONE — Algeria's #1 Classifieds Marketplace" },
+      { name: "description", content: "Buy & sell across all 58 wilayas: cars, real estate, phones, electronics, jobs and more on ALGZONE." },
     ],
   }),
   component: Home,
@@ -171,7 +171,7 @@ function Home() {
           <div className="card-elevated p-12 text-center">
             <div className="text-6xl mb-4">🛍️</div>
             <h3 className="text-xl font-bold mb-2">No ads yet</h3>
-            <p className="text-muted-foreground mb-6">Be the first to post an ad on E-souq!</p>
+            <p className="text-muted-foreground mb-6">Be the first to post an ad on ALGZONE!</p>
             <Link to="/post"><Button className="btn-hero rounded-xl">Post the first ad</Button></Link>
           </div>
         )}

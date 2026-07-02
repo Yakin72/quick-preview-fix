@@ -8,7 +8,7 @@ import { Calendar, LayoutGrid, MapPin, MessageCircle, Star } from "lucide-react"
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/user/$uid")({
-  head: () => ({ meta: [{ title: "Seller Profile — E-souq" }] }),
+  head: () => ({ meta: [{ title: "Seller Profile — ALGZONE" }] }),
   component: UserProfilePage,
 });
 
