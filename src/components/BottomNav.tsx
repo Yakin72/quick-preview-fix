@@ -1,13 +1,14 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, LayoutGrid, Search, PlusCircle, Heart } from "lucide-react";
 
-const items = [
+type Item = { to: string; icon: any; label: string; exact?: boolean; primary?: boolean; search?: any };
+const items: Item[] = [
   { to: "/", icon: Home, label: "Home", exact: true },
   { to: "/browse", icon: LayoutGrid, label: "Categories" },
-  { to: "/browse", icon: Search, label: "Search", search: { focus: 1 } },
+  { to: "/browse", icon: Search, label: "Search" },
   { to: "/post", icon: PlusCircle, label: "Post", primary: true },
   { to: "/swipe", icon: Heart, label: "Swipe" },
-] as const;
+];
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -19,15 +20,14 @@ export function BottomNav() {
       <ul className="grid grid-cols-5 h-16">
         {items.map((it) => {
           const Icon = it.icon;
-          const active =
-            "exact" in it && it.exact
-              ? pathname === it.to
-              : pathname === it.to || pathname.startsWith(it.to + "/");
+          const active = it.exact
+            ? pathname === it.to
+            : pathname === it.to || pathname.startsWith(it.to + "/");
           return (
             <li key={it.label} className="flex">
               <Link
-                to={it.to}
-                search={(it as any).search}
+                to={it.to as any}
+                search={it.search}
                 className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] transition ${
                   it.primary
                     ? "text-primary"
