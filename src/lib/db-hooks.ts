@@ -79,12 +79,20 @@ export type Conversation = {
   unread?: Record<string, number>;
 };
 
+export type MessageAttachment = {
+  listingId: string;
+  title: string;
+  image?: string;
+  price?: number;
+};
+
 export type Message = {
   id: string;
   uid: string;
   name: string;
   text: string;
   ts: number;
+  attachment?: MessageAttachment;
 };
 
 export function useListings(opts?: { category?: string; approvedOnly?: boolean; ownerUid?: string }) {
