@@ -175,15 +175,18 @@ function SwipePage() {
 
         {/* Action buttons */}
         {current && (
-          <div className="flex items-center justify-center gap-4 mt-6">
+          <div className="flex items-center justify-center gap-3 mt-6">
             <ActionBtn color="bg-red-500/10 text-red-500 border-red-500/30" onClick={() => doAction("pass")} label="تخطي">
-              <X className="size-7" strokeWidth={3} />
+              <X className="size-6" strokeWidth={3} />
+            </ActionBtn>
+            <ActionBtn color="bg-primary/10 text-primary border-primary/30" onClick={() => doAction("reply")} label="رد">
+              <MessageCircle className="size-6" />
             </ActionBtn>
             <ActionBtn color="bg-gold/10 text-gold border-gold/30" onClick={() => doAction("save")} label="حفظ" big>
               <Bookmark className="size-8" />
             </ActionBtn>
             <ActionBtn color="bg-green-500/10 text-green-500 border-green-500/30" onClick={() => doAction("like")} label="إعجاب">
-              <Heart className="size-7 fill-current" />
+              <Heart className="size-6 fill-current" />
             </ActionBtn>
           </div>
         )}
