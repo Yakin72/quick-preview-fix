@@ -34,10 +34,15 @@ function ProfilePage() {
 
   const selectedConversation = conversation || conversations[0]?.id;
   const messages = useMessages(selectedConversation);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (user?.uid && selectedConversation) markConversationRead(selectedConversation, user.uid).catch(() => {});
   }, [selectedConversation, user?.uid]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages.length, selectedConversation]);
 
   if (loading) return <AppShell><div className="mx-auto max-w-2xl px-4 py-16 text-center">...</div></AppShell>;
   if (!user) return <AppShell><div className="mx-auto max-w-md card-elevated p-8 my-16 text-center"><h2 className="text-xl font-bold mb-4">Sign In Required</h2><Link to="/auth"><Button className="btn-hero rounded-xl">Sign In</Button></Link></div></AppShell>;
