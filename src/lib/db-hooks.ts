@@ -190,29 +190,37 @@ export async function incrementViews(listingId: string) {
   await runTransaction(ref(f.db, `listings/${listingId}/views`), (n) => (n || 0) + 1);
 }
 
-export async function uploadListingImage(uid: string, file: File): Promise<string> {
-  const f = await getFirebase();
-  const path = `listings/${uid}/${Date.now()}_${Math.random().toString(36).slice(2)}_${file.name}`;
-  const r = sRef(f.storage, path);
-  await uploadBytes(r, file);
-  return await getDownloadURL(r);
+export async function uploadListingImage(_uid: string, file: File): Promise<string> {
+  // Store image as base64 data URL (no cloud storage upload)
+  return await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Failed to read image"));
+    reader.readAsDataURL(file);
+  });
 }
 
-export async function uploadUserAvatar(uid: string, file: File): Promise<string> {
-  const f = await getFirebase();
-  const path = `avatars/${uid}/${Date.now()}_${file.name}`;
-  const r = sRef(f.storage, path);
-  await uploadBytes(r, file);
-  return await getDownloadURL(r);
+export async function uploadUserAvatar(_uid: string, file: File): Promise<string> {
+  return await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Failed to read image"));
+    reader.readAsDataURL(file);
+  });
 }
 
 export async function createListing(data: Omit<Listing, "id" | "createdAt" | "approved" | "views" | "likes">) {
-  const f = await getFirebase();
-  const r = push(ref(f.db, "listings"));
-  const payload = { ...data, createdAt: Date.now(), approved: false, views: 0, likes: 0 };
-  await set(r, payload);
-  return r.key as string;
+  // Do NOT save to database or publish to store — just return a local preview id.
+  const id = `local_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  if (typeof window !== "undefined") {
+    try {
+      const payload = { id, ...data, createdAt: Date.now(), approved: false, views: 0, likes: 0 };
+      sessionStorage.setItem(`preview_listing_${id}`, JSON.stringify(payload));
+    } catch {}
+  }
+  return id;
 }
+
 
 export async function approveListing(id: string, approved: boolean) {
   const f = await getFirebase();
