@@ -32,11 +32,23 @@ function Home() {
     <AppShell>
       {/* HERO */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
         <div
-          className="absolute inset-0 opacity-40 mix-blend-screen bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${heroBg.url})` }}
         />
+        {/* subtle green tint overlay */}
+        <div className="absolute inset-0 bg-[rgba(6,78,59,0.35)] backdrop-blur-[2px]" />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(6,78,59,0.15) 0%, rgba(0,0,0,0.45) 100%)" }} />
+        <div className="relative mx-auto max-w-7xl px-4 py-16 text-center text-white">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur mb-6 animate-fade-up">
+            <Sparkles className="size-4" /> <span className="text-sm font-medium">Live updates • Real-time listings</span>
+          </div>
+          <h1 className="text-3xl md:text-6xl font-black mb-4 animate-fade-up leading-tight drop-shadow-lg">
+            Everything you need, <span className="text-gold">in one place</span>
+          </h1>
+          <p className="text-base md:text-xl text-white/90 max-w-2xl mx-auto mb-8 animate-fade-up drop-shadow">
+            Buy & sell across all 58 Algerian wilayas — cars, real estate, phones, jobs and more.
+          </p>
         <div className="relative mx-auto max-w-7xl px-4 py-16 text-center text-white">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur mb-6 animate-fade-up">
             <Sparkles className="size-4" /> <span className="text-sm font-medium">Live updates • Real-time listings</span>
