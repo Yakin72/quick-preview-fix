@@ -49,16 +49,6 @@ function Home() {
           <p className="text-base md:text-xl text-white/90 max-w-2xl mx-auto mb-8 animate-fade-up drop-shadow">
             Buy & sell across all 58 Algerian wilayas — cars, real estate, phones, jobs and more.
           </p>
-        <div className="relative mx-auto max-w-7xl px-4 py-16 text-center text-white">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur mb-6 animate-fade-up">
-            <Sparkles className="size-4" /> <span className="text-sm font-medium">Live updates • Real-time listings</span>
-          </div>
-          <h1 className="text-3xl md:text-6xl font-black mb-4 animate-fade-up leading-tight">
-            Everything you need, <span className="text-gold">in one place</span>
-          </h1>
-          <p className="text-base md:text-xl text-white/85 max-w-2xl mx-auto mb-8 animate-fade-up">
-            Buy & sell across all 58 Algerian wilayas — cars, real estate, phones, jobs and more.
-          </p>
 
           <form
             onSubmit={(e) => { e.preventDefault(); navigate({ to: "/browse", search: { q } as any }); }}
