@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Plus, User, LogOut, Shield, Menu, Moon, Sun, Bell, MessageSquare, Home as HomeIcon, LogIn, UserPlus, Bookmark, Store } from "lucide-react";
+import { BottomNav } from "@/components/BottomNav";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -158,7 +159,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 pb-20 md:pb-0">{children}</main>
+      <BottomNav />
+
+
 
       <footer className="border-t border-border bg-surface mt-16">
         <div className="mx-auto max-w-7xl px-4 py-10 grid gap-8 md:grid-cols-4">
