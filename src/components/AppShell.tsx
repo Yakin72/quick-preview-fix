@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 import { useTheme } from "@/lib/theme";
 import { CATEGORIES } from "@/lib/wilayas";
 import logoAsset from "@/assets/esouq-logo.png.asset.json";
-import storeIconAsset from "@/assets/store-icon.png.asset.json";
+import storeIconAsset from "@/assets/esouq-store-logo.png.asset.json";
 import { useState, type ReactNode } from "react";
 
 export function AppShell({ children }: { children: ReactNode }) {
