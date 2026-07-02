@@ -223,7 +223,7 @@ function Card({ listing, children }: { listing: Listing; children?: React.ReactN
         </div>
       )}
       <div className="absolute bottom-0 inset-x-0 p-5 text-white">
-        <div className="text-2xl font-black gradient-text-gold mb-1">{price}</div>
+        <div className="text-2xl font-black gradient-text mb-1">{price}</div>
         <h3 className="text-lg font-bold line-clamp-2 mb-2">{listing.title}</h3>
         <div className="flex items-center gap-1 text-xs text-white/85">
           <MapPin className="size-3" />
