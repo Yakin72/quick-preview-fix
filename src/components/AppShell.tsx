@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 import { useTheme } from "@/lib/theme";
 import { CATEGORIES } from "@/lib/wilayas";
 import { useNotifications, useConversations } from "@/lib/db-hooks";
-import logoAsset from "@/assets/esouq-logo-clean.png.asset.json";
+import logoAsset from "@/assets/algzone-logo.png.asset.json";
 import storeIconAsset from "@/assets/esouq-store-logo.png.asset.json";
 import { useState, type ReactNode } from "react";
 

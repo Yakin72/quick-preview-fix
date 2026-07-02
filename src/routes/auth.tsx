@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { WILAYAS } from "@/lib/wilayas";
 import { toast } from "sonner";
-import logoAsset from "@/assets/esouq-logo.png.asset.json";
+import logoAsset from "@/assets/algzone-logo.png.asset.json";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign In — ALGZONE" }] }),
