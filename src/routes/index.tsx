@@ -8,7 +8,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "@tanstack/react-router";
-import heroBg from "@/assets/hero-bg-3d.png.asset.json";
+import heroBg from "@/assets/maqam-echahid.jpeg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
