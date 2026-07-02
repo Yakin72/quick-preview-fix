@@ -211,7 +211,9 @@ export function useMyRating(targetUid: string | undefined, fromUid: string | und
 
 async function pushNotification(uid: string, data: Omit<Notification, "id">) {
   const f = await getFirebase();
-  await set(push(ref(f.db, `notifications/${uid}`)), data);
+  const clean: Record<string, any> = {};
+  for (const [k, v] of Object.entries(data)) if (v !== undefined) clean[k] = v;
+  await set(push(ref(f.db, `notifications/${uid}`)), clean);
 }
 
 export function useNotifications(uid: string | undefined) {
