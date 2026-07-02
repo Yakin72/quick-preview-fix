@@ -14,7 +14,7 @@ import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/profile")({
-  head: () => ({ meta: [{ title: "My Profile — E-souq" }] }),
+  head: () => ({ meta: [{ title: "My Profile — ALGZONE" }] }),
   validateSearch: (s: Record<string, unknown>) => ({ tab: (s.tab as string) || "ads", conversation: s.conversation as string | undefined }),
   component: ProfilePage,
 });

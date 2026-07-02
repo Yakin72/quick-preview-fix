@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/swipe")({
   head: () => ({
     meta: [
-      { title: "Swipe — E-souq" },
+      { title: "Swipe — ALGZONE" },
       { name: "description", content: "Discover ads with a swipe. Right to like, left to skip, up to save." },
     ],
   }),

@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { X, Upload, ImagePlus } from "lucide-react";
 
 export const Route = createFileRoute("/post")({
-  head: () => ({ meta: [{ title: "Post Ad — E-souq" }] }),
+  head: () => ({ meta: [{ title: "Post Ad — ALGZONE" }] }),
   component: PostPage,
 });
 

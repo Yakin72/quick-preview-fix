@@ -36,9 +36,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             <SheetContent side="right" className="w-[320px] sm:w-[380px] overflow-y-auto p-0">
               <SheetHeader className="p-4 border-b border-border bg-gradient-to-br from-primary/10 to-gold/10">
                 <SheetTitle className="flex items-center gap-3">
-                  <img src={logoAsset.url} alt="E-souq" className="size-12 rounded-xl bg-white p-1" />
+                  <img src={logoAsset.url} alt="ALGZONE" className="size-12 rounded-xl bg-white p-1" />
                   <div>
-                    <div className="font-black text-lg">E-souq</div>
+                    <div className="font-black text-lg">ALGZONE</div>
                     <div className="text-[11px] text-muted-foreground font-normal">Electronique | Market</div>
                   </div>
                 </SheetTitle>
@@ -101,7 +101,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
                 <div className="text-[11px] uppercase tracking-wider text-muted-foreground px-3 py-1">Useful Links</div>
                 <MenuItem icon={<img src={storeIconAsset.url} alt="" className="size-5 object-contain" />} label="Create Online Store" />
-                <MenuItem label="Advertise on E-souq" />
+                <MenuItem label="Advertise on ALGZONE" />
                 <MenuItem label="How to advertise?" />
                 <MenuItem label="Contact" />
                 <MenuItem label="Privacy Policy" />
@@ -112,9 +112,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Sheet>
 
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            <img src={logoAsset.url} alt="E-souq" className="size-11 rounded-xl bg-white p-1 shadow-sm" />
+            <img src={logoAsset.url} alt="ALGZONE" className="size-11 rounded-xl bg-white p-1 shadow-sm" />
             <div className="hidden sm:block">
-              <div className="font-black text-lg leading-none text-primary">E-souq</div>
+              <div className="font-black text-lg leading-none text-primary">ALGZONE</div>
               <div className="text-[10px] text-muted-foreground">Electronique | Market</div>
             </div>
           </Link>
@@ -176,8 +176,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="mx-auto max-w-7xl px-4 py-10 grid gap-8 md:grid-cols-4">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <img src={logoAsset.url} alt="E-souq" className="size-10 rounded-xl bg-white p-1" />
-              <div className="font-black">E-souq</div>
+              <img src={logoAsset.url} alt="ALGZONE" className="size-10 rounded-xl bg-white p-1" />
+              <div className="font-black">ALGZONE</div>
             </div>
             <p className="text-sm text-muted-foreground">Algeria's #1 classifieds marketplace — buy, sell, connect easily.</p>
           </div>
@@ -199,7 +199,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
           <div>
             <h4 className="font-bold mb-3">Contact</h4>
-            <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} E-souq. All rights reserved.</p>
+            <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} ALGZONE. All rights reserved.</p>
           </div>
         </div>
       </footer>
