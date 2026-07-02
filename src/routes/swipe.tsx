@@ -279,13 +279,15 @@ function SwipeCard({ listing, onAction }: { listing: Listing; onAction: (a: Acti
   const likeOpacity = useTransform(x, [20, 140], [0, 1]);
   const passOpacity = useTransform(x, [-140, -20], [1, 0]);
   const saveOpacity = useTransform(y, [-140, -20], [1, 0]);
+  const replyOpacity = useTransform(y, [20, 140], [0, 1]);
 
   const onDragEnd = (_: any, info: PanInfo) => {
     const { offset, velocity } = info;
     const swipe = Math.abs(offset.x) * 0.5 + Math.abs(velocity.x) * 0.05;
+    if (offset.y > 120 || velocity.y > 600) { onAction("reply"); y.set(0); x.set(0); return; }
     if (offset.y < -120 || velocity.y < -600) return onAction("save");
-    if (offset.x > 120 || (offset.x > 60 && velocity.x > 400) || swipe > 200 && offset.x > 0) return onAction("like");
-    if (offset.x < -120 || (offset.x < -60 && velocity.x < -400) || swipe > 200 && offset.x < 0) return onAction("pass");
+    if (offset.x > 120 || (offset.x > 60 && velocity.x > 400) || (swipe > 200 && offset.x > 0)) return onAction("like");
+    if (offset.x < -120 || (offset.x < -60 && velocity.x < -400) || (swipe > 200 && offset.x < 0)) return onAction("pass");
   };
 
   return (
@@ -297,7 +299,7 @@ function SwipeCard({ listing, onAction }: { listing: Listing; onAction: (a: Acti
       onDragEnd={onDragEnd}
       initial={{ scale: 0.9, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      exit={{ x: x.get() > 0 ? 800 : x.get() < 0 ? -800 : 0, y: y.get() < 0 ? -800 : 0, opacity: 0, transition: { duration: 0.35 } }}
+      exit={{ x: x.get() > 0 ? 800 : x.get() < 0 ? -800 : 0, y: y.get() < -50 ? -800 : 0, opacity: 0, transition: { duration: 0.35 } }}
       transition={{ type: "spring", stiffness: 260, damping: 22 }}
       className="absolute inset-0 cursor-grab active:cursor-grabbing z-20"
       whileTap={{ cursor: "grabbing" }}
@@ -311,6 +313,9 @@ function SwipeCard({ listing, onAction }: { listing: Listing; onAction: (a: Acti
         </motion.div>
         <motion.div style={{ opacity: saveOpacity }} className="absolute top-1/3 left-1/2 -translate-x-1/2 border-4 border-gold text-gold px-4 py-1.5 rounded-xl font-black text-2xl bg-white/90">
           SAVE
+        </motion.div>
+        <motion.div style={{ opacity: replyOpacity }} className="absolute bottom-24 left-1/2 -translate-x-1/2 border-4 border-primary text-primary px-4 py-1.5 rounded-xl font-black text-2xl bg-white/90 flex items-center gap-2">
+          <MessageCircle className="size-6" /> REPLY
         </motion.div>
       </Card>
     </motion.div>
