@@ -167,6 +167,7 @@ function SwipePage() {
                 {lastAction === "like" && <Heart className="size-32 text-red-500 fill-red-500 drop-shadow-2xl" />}
                 {lastAction === "pass" && <X className="size-32 text-white bg-slate-800/70 rounded-full p-4 drop-shadow-2xl" strokeWidth={3} />}
                 {lastAction === "save" && <Bookmark className="size-32 text-gold fill-gold drop-shadow-2xl" />}
+                {lastAction === "reply" && <MessageCircle className="size-32 text-primary fill-primary/30 drop-shadow-2xl" />}
               </motion.div>
             )}
           </AnimatePresence>
