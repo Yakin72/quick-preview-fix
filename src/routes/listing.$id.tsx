@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import {
   useListing, useComments, addComment, deleteComment, toggleLike, useLiked,
-  incrementViews, deleteListing, toggleSaved, useIsSaved, useListings
+  incrementViews, deleteListing, toggleSaved, useIsSaved, useListings, startConversation
 } from "@/lib/db-hooks";
 import { useAuth } from "@/lib/auth-context";
 import { useEffect, useMemo, useState } from "react";
@@ -50,6 +50,19 @@ function ListingPage() {
   const isLongDesc = shortDesc.length > 400;
 
   const handleLike = async () => { if (!user) return navigate({ to: "/auth" }); await toggleLike(listing.id, user.uid); };
+  const handleMessage = async () => {
+    if (!user) return navigate({ to: "/auth" });
+    if (user.uid === listing.ownerUid) return navigate({ to: "/profile", search: { tab: "messages" } as any });
+    const conversation = await startConversation({
+      listingId: listing.id,
+      listingTitle: listing.title,
+      fromUid: user.uid,
+      fromName: user.displayName || user.email || "User",
+      toUid: listing.ownerUid,
+      toName: listing.ownerName || "Seller",
+    });
+    navigate({ to: "/profile", search: { tab: "messages", conversation } as any });
+  };
   const handleSave = async () => {
     if (!user) return navigate({ to: "/auth" });
     const s = await toggleSaved(listing.id, user.uid);
@@ -216,7 +229,7 @@ function ListingPage() {
           {/* RIGHT: SELLER + ACTIONS */}
           <div className="space-y-4">
             <div className="card-elevated p-6 sticky top-20">
-              <div className="flex items-center gap-3 mb-4">
+              <Link to="/user/$uid" params={{ uid: listing.ownerUid }} className="flex items-center gap-3 mb-4 rounded-xl hover:bg-accent/60 transition p-1 -m-1">
                 <div className="size-12 rounded-full btn-hero flex items-center justify-center text-primary-foreground font-bold overflow-hidden">
                   {listing.ownerPhoto ? <img src={listing.ownerPhoto} alt="" className="w-full h-full object-cover" /> : (listing.ownerName || "?")[0].toUpperCase()}
                 </div>
@@ -224,7 +237,7 @@ function ListingPage() {
                   <div className="font-bold">{listing.ownerName || "Seller"}</div>
                   <div className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="size-3" /> {listing.wilaya}</div>
                 </div>
-              </div>
+              </Link>
 
               {/* CONTACT BUTTONS — brand colors */}
               <div className="space-y-2">
@@ -253,6 +266,10 @@ function ListingPage() {
                     Viber
                   </Button>
                 </a>
+
+                <Button onClick={handleMessage} variant="outline" className="w-full h-11 rounded-xl gap-2">
+                  <MessageCircle className="size-4" /> Message in E-souq
+                </Button>
               </div>
 
               <div className="grid grid-cols-3 gap-2 mt-3">

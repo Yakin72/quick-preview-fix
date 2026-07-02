@@ -43,6 +43,50 @@ export type Comment = {
   likes?: number;
 };
 
+export type UserProfile = {
+  uid: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  wilaya?: string;
+  photoURL?: string;
+  createdAt?: number;
+  ratingCount?: number;
+  ratingSum?: number;
+};
+
+export type Notification = {
+  id: string;
+  type: "comment" | "message" | "listing";
+  title: string;
+  body: string;
+  listingId?: string;
+  conversationId?: string;
+  fromUid?: string;
+  fromName?: string;
+  ts: number;
+  read?: boolean;
+};
+
+export type Conversation = {
+  id: string;
+  members: Record<string, true>;
+  memberNames: Record<string, string>;
+  listingId?: string;
+  listingTitle?: string;
+  lastMessage?: string;
+  lastAt: number;
+  unread?: Record<string, number>;
+};
+
+export type Message = {
+  id: string;
+  uid: string;
+  name: string;
+  text: string;
+  ts: number;
+};
+
 export function useListings(opts?: { category?: string; approvedOnly?: boolean; ownerUid?: string }) {
   const [data, setData] = useState<Listing[] | null>(null);
   const approvedOnly = opts?.approvedOnly ?? true;
@@ -108,7 +152,196 @@ export function useComments(listingId: string | undefined) {
 export async function addComment(listingId: string, uid: string, name: string, text: string) {
   const f = await getFirebase();
   const r = push(ref(f.db, `comments/${listingId}`));
-  await set(r, { uid, name, text, ts: Date.now(), likes: 0 });
+  const ts = Date.now();
+  await set(r, { uid, name, text, ts, likes: 0 });
+  const listingSnap = await get(ref(f.db, `listings/${listingId}`));
+  const listing = listingSnap.val() as Listing | null;
+  if (listing?.ownerUid && listing.ownerUid !== uid) {
+    await pushNotification(listing.ownerUid, {
+      type: "comment",
+      title: "New comment on your ad",
+      body: `${name}: ${text}`.slice(0, 180),
+      listingId,
+      fromUid: uid,
+      fromName: name,
+      ts,
+      read: false,
+    });
+  }
+}
+
+export function useUserProfile(uid: string | undefined) {
+  const [data, setData] = useState<UserProfile | null | undefined>(undefined);
+  useEffect(() => {
+    if (!uid) { setData(null); return; }
+    let unsub: (() => void) | null = null;
+    getFirebase().then((f) => {
+      const r = ref(f.db, `users/${uid}`);
+      unsub = onValue(r, (snap) => {
+        const v = snap.val();
+        setData(v ? { uid, ...v } : null);
+      });
+    });
+    return () => { if (unsub) unsub(); };
+  }, [uid]);
+  return data;
+}
+
+export async function rateUser(targetUid: string, fromUid: string, rating: number) {
+  const f = await getFirebase();
+  const clamped = Math.max(1, Math.min(5, Math.round(rating)));
+  const old = await get(ref(f.db, `ratings/${targetUid}/${fromUid}`));
+  await set(ref(f.db, `ratings/${targetUid}/${fromUid}`), clamped);
+  await runTransaction(ref(f.db, `users/${targetUid}/ratingSum`), (n) => (n || 0) - (old.val() || 0) + clamped);
+  if (!old.exists()) await runTransaction(ref(f.db, `users/${targetUid}/ratingCount`), (n) => (n || 0) + 1);
+}
+
+export function useMyRating(targetUid: string | undefined, fromUid: string | undefined) {
+  const [rating, setRating] = useState(0);
+  useEffect(() => {
+    if (!targetUid || !fromUid) { setRating(0); return; }
+    let unsub: (() => void) | null = null;
+    getFirebase().then((f) => {
+      unsub = onValue(ref(f.db, `ratings/${targetUid}/${fromUid}`), (snap) => setRating(snap.val() || 0));
+    });
+    return () => { if (unsub) unsub(); };
+  }, [targetUid, fromUid]);
+  return rating;
+}
+
+async function pushNotification(uid: string, data: Omit<Notification, "id">) {
+  const f = await getFirebase();
+  await set(push(ref(f.db, `notifications/${uid}`)), data);
+}
+
+export function useNotifications(uid: string | undefined) {
+  const [data, setData] = useState<Notification[]>([]);
+  useEffect(() => {
+    if (!uid) { setData([]); return; }
+    let unsub: (() => void) | null = null;
+    getFirebase().then((f) => {
+      unsub = onValue(ref(f.db, `notifications/${uid}`), (snap) => {
+        const val = snap.val() || {};
+        const arr: Notification[] = Object.entries(val).map(([id, v]: any) => ({ id, ...v }));
+        arr.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+        setData(arr);
+      });
+    });
+    return () => { if (unsub) unsub(); };
+  }, [uid]);
+  return data;
+}
+
+export async function markNotificationRead(uid: string, id: string) {
+  const f = await getFirebase();
+  await update(ref(f.db, `notifications/${uid}/${id}`), { read: true });
+}
+
+export async function startConversation(input: {
+  listingId?: string;
+  listingTitle?: string;
+  fromUid: string;
+  fromName: string;
+  toUid: string;
+  toName: string;
+}) {
+  const f = await getFirebase();
+  const pair = [input.fromUid, input.toUid].sort().join("_");
+  const id = `${pair}_${input.listingId || "profile"}`;
+  const convRef = ref(f.db, `conversations/${id}`);
+  const snap = await get(convRef);
+  if (!snap.exists()) {
+    const payload: Omit<Conversation, "id"> = {
+      members: { [input.fromUid]: true, [input.toUid]: true },
+      memberNames: { [input.fromUid]: input.fromName, [input.toUid]: input.toName },
+      listingId: input.listingId,
+      listingTitle: input.listingTitle,
+      lastAt: Date.now(),
+      unread: { [input.fromUid]: 0, [input.toUid]: 0 },
+    };
+    await set(convRef, payload);
+    await set(ref(f.db, `userConversations/${input.fromUid}/${id}`), true);
+    await set(ref(f.db, `userConversations/${input.toUid}/${id}`), true);
+  }
+  return id;
+}
+
+export function useConversations(uid: string | undefined) {
+  const [data, setData] = useState<Conversation[]>([]);
+  useEffect(() => {
+    if (!uid) { setData([]); return; }
+    let unsub: (() => void) | null = null;
+    getFirebase().then((f) => {
+      unsub = onValue(ref(f.db, `userConversations/${uid}`), async (snap) => {
+        const ids = Object.keys(snap.val() || {});
+        const rows = await Promise.all(ids.map(async (id) => {
+          const s = await get(ref(f.db, `conversations/${id}`));
+          return s.exists() ? { id, ...s.val() } as Conversation : null;
+        }));
+        setData((rows.filter(Boolean) as Conversation[]).sort((a, b) => (b.lastAt || 0) - (a.lastAt || 0)));
+      });
+    });
+    return () => { if (unsub) unsub(); };
+  }, [uid]);
+  return data;
+}
+
+export function useMessages(conversationId: string | undefined) {
+  const [data, setData] = useState<Message[]>([]);
+  useEffect(() => {
+    if (!conversationId) { setData([]); return; }
+    let unsub: (() => void) | null = null;
+    getFirebase().then((f) => {
+      unsub = onValue(ref(f.db, `messages/${conversationId}`), (snap) => {
+        const val = snap.val() || {};
+        const arr: Message[] = Object.entries(val).map(([id, v]: any) => ({ id, ...v }));
+        arr.sort((a, b) => (a.ts || 0) - (b.ts || 0));
+        setData(arr);
+      });
+    });
+    return () => { if (unsub) unsub(); };
+  }, [conversationId]);
+  return data;
+}
+
+export async function sendMessage(conversationId: string, uid: string, name: string, text: string) {
+  const f = await getFirebase();
+  const clean = text.trim();
+  if (!clean) return;
+  const ts = Date.now();
+  await set(push(ref(f.db, `messages/${conversationId}`)), { uid, name, text: clean, ts });
+  const convSnap = await get(ref(f.db, `conversations/${conversationId}`));
+  const conv = convSnap.val() as Conversation | null;
+  if (!conv) return;
+  const otherUid = Object.keys(conv.members || {}).find((id) => id !== uid);
+  const updates: Record<string, any> = {
+    [`conversations/${conversationId}/lastMessage`]: clean,
+    [`conversations/${conversationId}/lastAt`]: ts,
+    [`userConversations/${uid}/${conversationId}`]: true,
+  };
+  if (otherUid) {
+    updates[`userConversations/${otherUid}/${conversationId}`] = true;
+    updates[`conversations/${conversationId}/unread/${otherUid}`] = (conv.unread?.[otherUid] || 0) + 1;
+  }
+  await update(ref(f.db), updates);
+  if (otherUid) {
+    await pushNotification(otherUid, {
+      type: "message",
+      title: "New message",
+      body: `${name}: ${clean}`.slice(0, 180),
+      conversationId,
+      listingId: conv.listingId,
+      fromUid: uid,
+      fromName: name,
+      ts,
+      read: false,
+    });
+  }
+}
+
+export async function markConversationRead(conversationId: string, uid: string) {
+  const f = await getFirebase();
+  await set(ref(f.db, `conversations/${conversationId}/unread/${uid}`), 0);
 }
 
 export async function deleteComment(listingId: string, commentId: string) {
