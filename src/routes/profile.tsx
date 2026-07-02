@@ -1,30 +1,43 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth-context";
-import { useListings, useSavedListings, uploadUserAvatar } from "@/lib/db-hooks";
+import {
+  useListings, useSavedListings, uploadUserAvatar, useNotifications, useConversations,
+  useMessages, sendMessage, markConversationRead, markNotificationRead, type Conversation
+} from "@/lib/db-hooks";
 import { ListingCard } from "@/components/ListingCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Camera, Bookmark, MessageSquare, Bell, LayoutGrid, User as UserIcon } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "My Profile — E-souq" }] }),
-  validateSearch: (s: Record<string, unknown>) => ({ tab: (s.tab as string) || "ads" }),
+  validateSearch: (s: Record<string, unknown>) => ({ tab: (s.tab as string) || "ads", conversation: s.conversation as string | undefined }),
   component: ProfilePage,
 });
 
 function ProfilePage() {
-  const { tab } = Route.useSearch();
+  const { tab, conversation } = Route.useSearch();
   const { user, loading, updateUserProfile } = useAuth();
   const mine = useListings({ ownerUid: user?.uid, approvedOnly: false });
   const saved = useSavedListings(user?.uid);
+  const notifications = useNotifications(user?.uid);
+  const conversations = useConversations(user?.uid);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState("");
+  const [messageText, setMessageText] = useState("");
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const selectedConversation = conversation || conversations[0]?.id;
+  const messages = useMessages(selectedConversation);
+
+  useEffect(() => {
+    if (user?.uid && selectedConversation) markConversationRead(selectedConversation, user.uid).catch(() => {});
+  }, [selectedConversation, user?.uid]);
 
   if (loading) return <AppShell><div className="mx-auto max-w-2xl px-4 py-16 text-center">...</div></AppShell>;
   if (!user) return <AppShell><div className="mx-auto max-w-md card-elevated p-8 my-16 text-center"><h2 className="text-xl font-bold mb-4">Sign In Required</h2><Link to="/auth"><Button className="btn-hero rounded-xl">Sign In</Button></Link></div></AppShell>;
@@ -43,14 +56,23 @@ function ProfilePage() {
 
   const approved = mine?.filter((l) => l.approved) || [];
   const pending = mine?.filter((l) => !l.approved) || [];
+  const unreadNotifications = notifications.filter((n) => !n.read).length;
+  const unreadMessages = conversations.reduce((sum, c) => sum + (c.unread?.[user.uid] || 0), 0);
 
   const tabs = [
     { id: "ads", label: "My Ads", icon: LayoutGrid, count: mine?.length ?? 0 },
     { id: "saved", label: "Saved", icon: Bookmark, count: saved?.length ?? 0 },
-    { id: "messages", label: "Messages", icon: MessageSquare, count: 0 },
-    { id: "notifications", label: "Notifications", icon: Bell, count: 0 },
+    { id: "messages", label: "Messages", icon: MessageSquare, count: unreadMessages },
+    { id: "notifications", label: "Notifications", icon: Bell, count: unreadNotifications },
     { id: "profile", label: "Profile", icon: UserIcon, count: 0 },
   ];
+
+  const sendCurrentMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedConversation || !messageText.trim()) return;
+    await sendMessage(selectedConversation, user.uid, user.displayName || user.email || "User", messageText);
+    setMessageText("");
+  };
 
   return (
     <AppShell>
@@ -122,18 +144,62 @@ function ProfilePage() {
         )}
 
         {tab === "messages" && (
-          <div className="card-elevated p-12 text-center">
-            <MessageSquare className="size-12 mx-auto mb-3 text-muted-foreground" />
-            <h3 className="font-bold mb-2">Messages</h3>
-            <p className="text-muted-foreground text-sm">In-platform messaging coming soon. Use WhatsApp or phone buttons on ads for now.</p>
+          <div className="grid md:grid-cols-[320px_1fr] gap-4 min-h-[560px]">
+            <div className="card-elevated overflow-hidden">
+              <div className="p-4 border-b border-border font-black flex items-center gap-2"><MessageSquare className="size-4" /> Messages</div>
+              {conversations.length === 0 ? (
+                <div className="p-8 text-center text-sm text-muted-foreground">No conversations yet.</div>
+              ) : conversations.map((c) => <ConversationRow key={c.id} conversation={c} currentUid={user.uid} selected={selectedConversation === c.id} />)}
+            </div>
+            <div className="card-elevated overflow-hidden flex flex-col">
+              {!selectedConversation ? (
+                <div className="m-auto text-center text-muted-foreground"><MessageSquare className="size-12 mx-auto mb-3" />Choose a conversation</div>
+              ) : (
+                <>
+                  <div className="p-4 border-b border-border font-bold">{conversations.find((c) => c.id === selectedConversation)?.listingTitle || "Conversation"}</div>
+                  <div className="flex-1 p-4 space-y-3 overflow-y-auto max-h-[420px] bg-muted/25">
+                    {messages.map((m) => (
+                      <div key={m.id} className={`flex ${m.uid === user.uid ? "justify-end" : "justify-start"}`}>
+                        <div className={`max-w-[78%] rounded-2xl px-4 py-2 text-sm ${m.uid === user.uid ? "btn-hero text-primary-foreground" : "bg-card border border-border"}`}>
+                          <div className="font-bold text-[11px] opacity-80 mb-0.5">{m.name}</div>
+                          <div>{m.text}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <form onSubmit={sendCurrentMessage} className="p-3 border-t border-border flex gap-2">
+                    <Input value={messageText} onChange={(e) => setMessageText(e.target.value)} placeholder="Write a message..." className="h-11" maxLength={800} />
+                    <Button type="submit" className="btn-hero rounded-xl" disabled={!messageText.trim()}>Send</Button>
+                  </form>
+                </>
+              )}
+            </div>
           </div>
         )}
 
         {tab === "notifications" && (
-          <div className="card-elevated p-12 text-center">
-            <Bell className="size-12 mx-auto mb-3 text-muted-foreground" />
-            <h3 className="font-bold mb-2">Notifications</h3>
-            <p className="text-muted-foreground text-sm">You're all caught up!</p>
+          <div className="card-elevated overflow-hidden">
+            <div className="p-4 border-b border-border font-black flex items-center gap-2"><Bell className="size-4" /> Notifications</div>
+            {notifications.length === 0 ? (
+              <div className="p-12 text-center text-muted-foreground">You're all caught up!</div>
+            ) : notifications.map((n) => (
+              <Link
+                key={n.id}
+                to={n.conversationId ? "/profile" : n.listingId ? "/listing/$id" : "/profile"}
+                params={n.listingId ? { id: n.listingId } : undefined as any}
+                search={n.conversationId ? { tab: "messages", conversation: n.conversationId } as any : undefined as any}
+                onClick={() => user?.uid && markNotificationRead(user.uid, n.id)}
+                className={`block p-4 border-b border-border last:border-0 hover:bg-accent/60 transition ${!n.read ? "bg-primary/5" : ""}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="font-bold text-sm">{n.title}</div>
+                    <div className="text-sm text-muted-foreground mt-1">{n.body}</div>
+                  </div>
+                  {!n.read && <span className="size-2 rounded-full bg-primary mt-2 shrink-0" />}
+                </div>
+              </Link>
+            ))}
           </div>
         )}
 
@@ -168,5 +234,26 @@ function Row({ label, value }: { label: string; value: string }) {
       <span className="text-sm text-muted-foreground">{label}</span>
       <span className="text-sm font-medium">{value}</span>
     </div>
+  );
+}
+
+function ConversationRow({ conversation, currentUid, selected }: { conversation: Conversation; currentUid: string; selected: boolean }) {
+  const otherUid = Object.keys(conversation.members || {}).find((id) => id !== currentUid) || currentUid;
+  const unread = conversation.unread?.[currentUid] || 0;
+  return (
+    <Link
+      to="/profile"
+      search={{ tab: "messages", conversation: conversation.id } as any}
+      className={`block p-4 border-b border-border last:border-0 hover:bg-accent/60 transition ${selected ? "bg-accent" : ""}`}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="font-bold text-sm truncate">{conversation.memberNames?.[otherUid] || "User"}</div>
+          <div className="text-xs text-muted-foreground truncate">{conversation.listingTitle || "Profile chat"}</div>
+          <div className="text-xs text-muted-foreground truncate mt-1">{conversation.lastMessage || "No messages yet"}</div>
+        </div>
+        {unread > 0 && <span className="text-[11px] bg-primary text-primary-foreground rounded-full min-w-5 h-5 px-1 flex items-center justify-center">{unread}</span>}
+      </div>
+    </Link>
   );
 }
