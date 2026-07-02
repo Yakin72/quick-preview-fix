@@ -213,7 +213,7 @@ function SwipePage() {
             <motion.div
               initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 260, damping: 26 }}
-              className="fixed left-0 right-0 bottom-0 z-50 bg-surface border-t border-border rounded-t-3xl p-5 pb-8 shadow-2xl max-w-md mx-auto"
+              className="fixed left-0 right-0 bottom-16 z-[60] bg-surface border-t border-border rounded-t-3xl p-5 pb-4 shadow-2xl max-w-md mx-auto"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -238,27 +238,23 @@ function SwipePage() {
                   <X className="size-5" />
                 </button>
               </div>
-              <div className="relative">
-                <Textarea
-                  autoFocus
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  placeholder={`Hi, is "${replyFor.title}" still available?`}
-                  rows={3}
-                  maxLength={800}
-                  disabled={replySending}
-                  className="pr-14"
-                />
-                <Button
-                  type="button"
-                  size="icon"
-                  className="absolute right-2 bottom-2 rounded-full btn-hero size-10"
-                  onClick={sendReply}
-                  disabled={!replyText.trim() || replySending}
-                >
-                  <Send className="size-4" />
-                </Button>
-              </div>
+              <Textarea
+                autoFocus
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder={`Hi, is "${replyFor.title}" still available?`}
+                rows={4}
+                maxLength={800}
+                disabled={replySending}
+              />
+              <Button
+                type="button"
+                className="w-full mt-3 rounded-full btn-hero h-11"
+                onClick={sendReply}
+                disabled={!replyText.trim() || replySending}
+              >
+                <Send className="size-4 ml-2" /> Send
+              </Button>
             </motion.div>
           </>
         )}
