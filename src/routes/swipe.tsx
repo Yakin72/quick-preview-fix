@@ -1,12 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import { useListings, toggleLike, toggleSaved, type Listing } from "@/lib/db-hooks";
+import { useListings, toggleLike, toggleSaved, startConversation, sendMessage, type Listing } from "@/lib/db-hooks";
 import { useAuth } from "@/lib/auth-context";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform, type PanInfo } from "framer-motion";
-import { Heart, X, Bookmark, MapPin, RotateCcw, Sparkles } from "lucide-react";
+import { Heart, X, Bookmark, MapPin, RotateCcw, Sparkles, MessageCircle, Send } from "lucide-react";
 import { CATEGORIES } from "@/lib/wilayas";
 import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/swipe")({
   head: () => ({
