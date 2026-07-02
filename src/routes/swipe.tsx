@@ -20,7 +20,7 @@ export const Route = createFileRoute("/swipe")({
   component: SwipePage,
 });
 
-type Action = "like" | "pass" | "save";
+type Action = "like" | "pass" | "save" | "reply";
 
 function SwipePage() {
   const listings = useListings({ approvedOnly: true });
@@ -29,6 +29,9 @@ function SwipePage() {
   const [index, setIndex] = useState(0);
   const [history, setHistory] = useState<{ id: string; action: Action }[]>([]);
   const [lastAction, setLastAction] = useState<Action | null>(null);
+  const [replyFor, setReplyFor] = useState<Listing | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [replySending, setReplySending] = useState(false);
 
   const deck = useMemo(() => listings || [], [listings]);
   const current = deck[index];
@@ -36,8 +39,47 @@ function SwipePage() {
 
   useEffect(() => { setIndex(0); setHistory([]); }, [deck.length]);
 
+  const openReply = (listing: Listing) => {
+    if (!user) {
+      toast.message("Sign in to reply", { action: { label: "Sign in", onClick: () => navigate({ to: "/auth" }) } });
+      return;
+    }
+    if (user.uid === listing.ownerUid) {
+      toast.message("This is your own ad");
+      return;
+    }
+    setReplyFor(listing);
+    setReplyText("");
+  };
+
+  const sendReply = async () => {
+    if (!user || !replyFor || !replyText.trim() || replySending) return;
+    setReplySending(true);
+    try {
+      const conversationId = await startConversation({
+        listingId: replyFor.id,
+        listingTitle: replyFor.title,
+        fromUid: user.uid,
+        fromName: user.displayName || user.email || "User",
+        toUid: replyFor.ownerUid,
+        toName: replyFor.ownerName || "Seller",
+      });
+      await sendMessage(conversationId, user.uid, user.displayName || user.email || "User", replyText.trim());
+      toast.success("Reply sent", {
+        action: { label: "Open chat", onClick: () => navigate({ to: "/profile", search: { tab: "messages", conversation: conversationId } as any }) },
+      });
+      setReplyFor(null);
+      setReplyText("");
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to send");
+    } finally {
+      setReplySending(false);
+    }
+  };
+
   const doAction = async (action: Action) => {
     if (!current) return;
+    if (action === "reply") { openReply(current); return; }
     setLastAction(action);
     setHistory((h) => [...h, { id: current.id, action }]);
     setIndex((i) => i + 1);
