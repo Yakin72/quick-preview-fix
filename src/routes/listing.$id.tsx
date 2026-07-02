@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import {
   useListing, useComments, addComment, deleteComment, toggleLike, useLiked,
-  incrementViews, deleteListing, toggleSaved, useIsSaved, useListings, startConversation
+  incrementViews, deleteListing, toggleSaved, useIsSaved, useListings, startConversation, sendMessage
 } from "@/lib/db-hooks";
 import { useAuth } from "@/lib/auth-context";
 import { useEffect, useMemo, useState } from "react";
@@ -30,6 +30,8 @@ function ListingPage() {
   const [showPhone, setShowPhone] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
+  const [swapText, setSwapText] = useState("");
+  const [swapSending, setSwapSending] = useState(false);
   const navigate = useNavigate();
   const all = useListings({ approvedOnly: true, category: listing?.category });
 
@@ -81,6 +83,34 @@ function ListingPage() {
   };
 
   const canManage = isAdmin || user?.uid === listing.ownerUid;
+  const canSwap = !!user && user.uid !== listing.ownerUid;
+
+  const handleSwap = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) { navigate({ to: "/auth" }); return; }
+    if (!swapText.trim() || swapSending) return;
+    setSwapSending(true);
+    try {
+      const conversationId = await startConversation({
+        listingId: listing.id,
+        listingTitle: listing.title,
+        fromUid: user.uid,
+        fromName: user.displayName || user.email || "User",
+        toUid: listing.ownerUid,
+        toName: listing.ownerName || "Seller",
+      });
+      await sendMessage(conversationId, user.uid, user.displayName || user.email || "User", swapText.trim());
+      setSwapText("");
+      toast.success("Reply sent to the seller", {
+        action: { label: "Open chat", onClick: () => navigate({ to: "/profile", search: { tab: "messages", conversation: conversationId } as any }) },
+      });
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to send");
+    } finally {
+      setSwapSending(false);
+    }
+  };
+
   const fullDate = new Date(listing.createdAt).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" });
   const timeAgo = (ts: number) => {
     const diff = Date.now() - ts;
@@ -215,7 +245,38 @@ function ListingPage() {
               </div>
             </div>
 
-            {/* SIMILAR ADS */}
+            {/* SWAP: inline reply to the ad */}
+            {user?.uid !== listing.ownerUid && (
+              <div className="card-elevated p-6 border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-gold/5">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="size-9 rounded-xl btn-hero flex items-center justify-center text-primary-foreground">
+                    <MessageCircle className="size-4" />
+                  </div>
+                  <div>
+                    <h2 className="font-black">Reply to this ad</h2>
+                    <p className="text-xs text-muted-foreground">Your message goes straight to {listing.ownerName || "the seller"} as a chat.</p>
+                  </div>
+                </div>
+                <form onSubmit={handleSwap} className="space-y-2">
+                  <Textarea
+                    value={swapText}
+                    onChange={(e) => setSwapText(e.target.value)}
+                    placeholder={user ? `Hi, is "${listing.title}" still available?` : "Sign in to send a reply"}
+                    disabled={!canSwap || swapSending}
+                    rows={3}
+                    maxLength={800}
+                  />
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[11px] text-muted-foreground">Sends privately in E-souq messages.</span>
+                    <Button type="submit" disabled={!canSwap || !swapText.trim() || swapSending} className="btn-hero rounded-xl gap-2">
+                      <MessageCircle className="size-4" /> {swapSending ? "Sending..." : "Send reply"}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+
             {similar.length > 0 && (
               <div>
                 <h2 className="text-xl font-black mb-4">Similar Ads</h2>
