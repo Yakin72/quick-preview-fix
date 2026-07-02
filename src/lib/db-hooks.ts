@@ -210,16 +210,13 @@ export async function uploadUserAvatar(_uid: string, file: File): Promise<string
 }
 
 export async function createListing(data: Omit<Listing, "id" | "createdAt" | "approved" | "views" | "likes">) {
-  // Do NOT save to database or publish to store — just return a local preview id.
-  const id = `local_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-  if (typeof window !== "undefined") {
-    try {
-      const payload = { id, ...data, createdAt: Date.now(), approved: false, views: 0, likes: 0 };
-      sessionStorage.setItem(`preview_listing_${id}`, JSON.stringify(payload));
-    } catch {}
-  }
-  return id;
+  const f = await getFirebase();
+  const r = push(ref(f.db, "listings"));
+  const payload = { ...data, createdAt: Date.now(), approved: false, views: 0, likes: 0 };
+  await set(r, payload);
+  return r.key as string;
 }
+
 
 
 export async function approveListing(id: string, approved: boolean) {
