@@ -114,7 +114,7 @@ function SwipePage() {
             <h1 className="text-2xl font-black flex items-center gap-2">
               <Sparkles className="text-gold" /> اكتشف
             </h1>
-            <p className="text-xs text-muted-foreground mt-1">اسحب يمين ❤️ · يسار ✕ · فوق 🔖</p>
+            <p className="text-xs text-muted-foreground mt-1">يمين ❤️ · يسار ✕ · فوق 🔖 · تحت 💬 للرد</p>
           </div>
           <button
             onClick={undo}
